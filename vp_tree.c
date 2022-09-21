@@ -1,10 +1,8 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include "utils.h"
+#include "vp_tree.h"
+#include "select.h"
 
-int N, D;
-
-typedef struct VPTree {
+typedef struct VPTree
+{
   double *vp;
   double md;
   int idx;
@@ -12,14 +10,6 @@ typedef struct VPTree {
   struct VPTree *outer;
 } VPTree;
 
-
-int main(int argc, char **argv) {
-
-  N = atoi(argv[1]);
-  D = atoi(argv[2]);
-
-  double **X = create_dataset();
-  print_dataset(X);
-
-  return EXIT_SUCCESS;
+VPTree get_vp_tree(double *Set, int size)
+{
 }
