@@ -1,41 +1,53 @@
-#include "select.h"
 #include "utils.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include "select.h"
+#include "structures.h"
 
 extern DIM;
 
-double *select_random_vp(double **Set, int size)
+Point select_random_vp(Set Set)
 {
-    int rand_idx = ((double)rand() / RAND_MAX) * size;
-    return Set[rand_idx];
+    Point p;
+    p.idx = ((double)rand() / RAND_MAX) * Set.size;
+    p.value = Set.points[p.idx];
+    return p;
 }
 
-double *select_last_vp(double **Set, int size)
+Point select_last_vp(Set S)
 {
-    return Set[size - 1];
+    Point p;
+    p.idx = S.size - 1;
+    p.value = S.points[p.idx];
+    return p;
 }
 
-double *select_best_vp(double **Set, int size)
+Point select_best_vp(Set S)
 {
-    int SAMPLE_SIZE = size / 10;
-    int NUM_SHUFFLES = size / 2;
+    int SAMPLE_SIZE = S.size / 10;
+    int NUM_SHUFFLES = S.size / 2;
 
     // P is a random subset of Set
-    double **P = get_random_sample(Set, size, SAMPLE_SIZE, NUM_SHUFFLES);
+    Set P = get_random_sample(S, SAMPLE_SIZE, NUM_SHUFFLES);
     double best_spread = 0;
-    double *best_p = (double *)malloc(DIM * sizeof(double));
+
+    Point best_p;
+    best_p.value = (double *)malloc(DIM * sizeof(double));
 
     for (int i = 0; i < SAMPLE_SIZE; i++)
     {
-        double *current_p = P[i];
+        Point current_p;
+        current_p.idx = i;
+        current_p.value = P.points[current_p.idx];
+
         // D is a random subset of Set
-        double **D = get_random_sample(Set, size, SAMPLE_SIZE, NUM_SHUFFLES);
+        Set D = get_random_sample(S, SAMPLE_SIZE, NUM_SHUFFLES);
+
         // Calculate distance of current_p fromevery point of D
         double *dists = (double *)malloc(SAMPLE_SIZE * sizeof(double));
         for (int j = 0; j < SAMPLE_SIZE; j++)
-            dists[j] = euclidean_dist(D[j], current_p);
+            dists[j] = euclidean_dist(D.points[j], current_p.value);
 
         // Calculate median of dists
         double median = get_median(dists, SAMPLE_SIZE);

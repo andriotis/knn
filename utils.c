@@ -1,67 +1,70 @@
-#include "utils.h"
-
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-
+#include "utils.h"
 #include "quickselect.h"
+#include "structures.h"
 
-extern int NUM_POINTS, DIM;
+extern int DIM;
 
-double **create_dataset()
+Set create_dataset(int size)
 {
 
-  double **X;
+  Set Set;
+  Set.size = size;
 
-  X = (double **)malloc(NUM_POINTS * sizeof(double *));
-  for (int i = 0; i < NUM_POINTS; i++)
+  Set.points = (double **)malloc(Set.size * sizeof(double *));
+  for (int i = 0; i < Set.size; i++)
   {
-    X[i] = (double *)malloc(DIM * sizeof(double));
+    Set.points[i] = (double *)malloc(DIM * sizeof(double));
   }
 
-  for (int i = 0; i < NUM_POINTS; i++)
+  for (int i = 0; i < Set.size; i++)
   {
     for (int j = 0; j < DIM; j++)
     {
-      X[i][j] = (double)rand() / (double)RAND_MAX;
+      Set.points[i][j] = (double)rand() / (double)RAND_MAX;
     }
   }
 
-  return X;
+  return Set;
 }
 
-void print_dataset(double **X)
+void print_dataset(Set Set)
 {
-  for (int i = 0; i < NUM_POINTS; i++)
+  for (int i = 0; i < Set.size; i++)
   {
     for (int j = 0; j < DIM; j++)
-      printf("%lf ", X[i][j]);
+      printf("%lf ", Set.points[i][j]);
     printf("\n");
   }
 }
 
 // Given a set of point returns a random sample of a certain size
-double **get_random_sample(double **Set, int size, int sample_size, int num_shuffles)
+Set get_random_sample(Set S, int sample_size, int num_shuffles)
 {
   // Create empty matrix to store smamples (subset of Set)
-  double **sample = (double **)malloc(sample_size * sizeof(double *));
+  Set sample;
+  sample.size = sample_size;
+
+  sample.points = (double **)malloc(sample_size * sizeof(double *));
   for (int i = 0; i < sample_size; i++)
   {
-    sample[i] = (double *)malloc(DIM * sizeof(double));
+    sample.points[i] = (double *)malloc(DIM * sizeof(double));
   }
 
   // Create array that contains the Set's indexes
-  int *setIndexes = (int *)malloc(size * sizeof(int));
-  for (int i = 0; i < size; i++)
+  int *setIndexes = (int *)malloc(S.size * sizeof(int));
+  for (int i = 0; i < S.size; i++)
     setIndexes[i] = i;
 
   // Shuffle set indexs array
   srand(3); // constant seed for testing
   for (int j = 0; j < num_shuffles; j++)
   {
-    for (int i = 0; i < size; i++)
+    for (int i = 0; i < S.size; i++)
     {
-      size_t j = i + rand() / (RAND_MAX / (size - i) + 1);
+      size_t j = i + rand() / (RAND_MAX / (S.size - i) + 1);
       int tmp = setIndexes[j];
       setIndexes[j] = setIndexes[i];
       setIndexes[i] = tmp;
@@ -71,7 +74,7 @@ double **get_random_sample(double **Set, int size, int sample_size, int num_shuf
   // Select the first 'sample_size' indexes to construct the sample
   for (int i = 0; i < sample_size; i++)
   {
-    sample[i] = Set[setIndexes[i]];
+    sample.points[i] = S.points[setIndexes[i]];
   }
 
   return sample;

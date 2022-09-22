@@ -1,8 +1,7 @@
 #ifndef VP_TREE_H
 #define VP_TREE_H
+#include "structures.h"
 
-typedef struct VPTree;
-
-VPTree get_vp_tree(double *Set, int size);
+VPTree *get_vp_tree(Set S);
 
 #endif
