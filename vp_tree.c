@@ -28,13 +28,15 @@ VPTree *get_vp_tree(Set S)
     Allocate space to hold points for each set.
     The maximum required size for each set equals the size of Set
   */
-  Inner.points = (double **)malloc(S.size * sizeof(double *));
-  Outer.points = (double **)malloc(S.size * sizeof(double *));
-  for (int i = 0; i < S.size; i++)
-  {
-    Inner.points[i] = (double *)malloc(DIM * sizeof(double));
-    Outer.points[i] = (double *)malloc(DIM * sizeof(double));
-  }
+  alloc(&Inner, S.size);
+  alloc(&Outer, S.size);
+  // Inner.points = (double **)malloc(S.size * sizeof(double *));
+  // Outer.points = (double **)malloc(S.size * sizeof(double *));
+  // for (int i = 0; i < S.size; i++)
+  // {
+  //   Inner.points[i] = (double *)malloc(DIM * sizeof(double));
+  //   Outer.points[i] = (double *)malloc(DIM * sizeof(double));
+  // }
 
   // Current size of each set (denotes the index where the next element should be placed)
   int inner_size = 0, outer_size = 0;
@@ -56,8 +58,10 @@ VPTree *get_vp_tree(Set S)
   }
 
   // Reallocate memory so every set has the minimum required size
-  Inner.points = (double **)realloc(Inner.points, inner_size * sizeof(double *));
-  Outer.points = (double **)realloc(Outer.points, outer_size * sizeof(double *));
+  realloc(&Inner, inner_size);
+  realloc(&Outer, outer_size);
+  // Inner.points = (double **)realloc(Inner.points, inner_size * sizeof(double *));
+  // Outer.points = (double **)realloc(Outer.points, outer_size * sizeof(double *));
 
   // Create inner and outer subtrees recursively
   node->inner = get_vp_tree(Inner);

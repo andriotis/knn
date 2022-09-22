@@ -27,4 +27,7 @@ typedef struct VPTree
     struct VPTree *outer;
 } VPTree;
 
+void make_space(Set *S, int size);
+void change_space(Set *S, int size);
+
 #endif
