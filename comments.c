@@ -11,4 +11,4 @@ typedef struct Set
 } Set;
 
 double *select_random_vp(Set S);
-double *euclidean(Point a, Point b)
+double *euclidean(Point a, Point b);

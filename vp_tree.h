@@ -2,6 +2,6 @@
 #define VP_TREE_H
 #include "structures.h"
 
-VPTree *get_vp_tree(Set S);
+VPTree *get_vp_tree(Set original_set, Set S);
 
 #endif
