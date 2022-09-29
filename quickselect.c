@@ -42,10 +42,10 @@ double quickselect(double *array, int left_index, int right_index, int kth_lowes
   int pivot_position = partition(array, left_index, right_index);
 
   if (kth_lowest_value < pivot_position)
-    quickselect(array, kth_lowest_value, left_index, pivot_position - 1);
+    return quickselect(array, kth_lowest_value, left_index, pivot_position - 1);
 
   else if (kth_lowest_value > pivot_position)
-    quickselect(array, kth_lowest_value, pivot_position + 1, right_index);
+    return quickselect(array, kth_lowest_value, pivot_position + 1, right_index);
 
   else
     return array[pivot_position];
