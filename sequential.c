@@ -5,14 +5,11 @@
 
 int n = 8;
 int d = 2;
+double **S;
+int *ids;
 
 VPTree *make_vp_tree(double **original_set, int *ids, int size)
 {
-    printf("ids inside the set: ");
-    for (int i = 0; i < size; i++)
-        printf("%d ", ids[i]);
-    printf("\n");
-
     if (size == 0)
         return NULL;
 
@@ -30,19 +27,7 @@ VPTree *make_vp_tree(double **original_set, int *ids, int size)
         distances_copy[i] = dist;
     }
 
-    printf("distances before: ");
-    for (int i = 0; i < size - 1; i++)
-        printf("%f ", distances_copy[i]);
-    printf("\n");
-
     node->md = get_median(distances_copy, size - 1);
-
-    printf("distances after: ");
-    for (int i = 0; i < size - 1; i++)
-        printf("%f ", distances_copy[i]);
-    printf("\n");
-
-    printf("median: %f\n", node->md);
 
     int *L = (int *)malloc((size - 1) * sizeof(int));
     int L_sz = 0;
@@ -66,9 +51,7 @@ VPTree *make_vp_tree(double **original_set, int *ids, int size)
     L = (int *)realloc(L, L_sz * sizeof(int));
     R = (int *)realloc(R, R_sz * sizeof(int));
 
-    printf("entering inner set..\n");
     node->inner = make_vp_tree(original_set, L, L_sz);
-    printf("entering outer set..\n");
     node->outer = make_vp_tree(original_set, R, R_sz);
 
     return node;
@@ -77,9 +60,10 @@ VPTree *make_vp_tree(double **original_set, int *ids, int size)
 int main()
 {
     srand(42);
-    double **S;
+
     S = (double **)malloc(n * sizeof(double *));
-    int *ids = (int *)malloc(n * sizeof(int));
+    ids = (int *)malloc(n * sizeof(int));
+
     for (int i = 0; i < n; i++)
     {
         S[i] = (double *)malloc(d * sizeof(double));

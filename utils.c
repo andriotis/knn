@@ -20,10 +20,7 @@ double euclidean_dist(double *point1, double *point2)
 /* Given an array, it returns the median of the values in it */
 double get_median(double *array, int size)
 {
-  if (size % 2 == 0)
-    return (quickselect(array, 0, size - 1, size / 2) +
-            quickselect(array, 0, size - 1, (size - 1) / 2)) /
-           2;
-  else
-    return quickselect(array, 0, size - 1, (size - 1) / 2);
+  return (quickselect(array, 0, size - 1, (size / 2) + 1) +
+          quickselect(array, 0, size - 1, ((size - 1) / 2) + 1)) /
+         2;
 }

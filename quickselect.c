@@ -1,5 +1,7 @@
 #include "quickselect.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
 
 void swap(double *a, double *b)
 {
@@ -8,45 +10,37 @@ void swap(double *a, double *b)
   *b = temp;
 }
 
-int partition(double *array, int left_pointer, int right_pointer)
+int partition(double *arr, int l, int r)
 {
-  int pivot_position = right_pointer;
-  double pivot = array[pivot_position];
-
-  right_pointer -= 1;
-
-  while (1)
+  double x = arr[r];
+  int i = l;
+  for (int j = l; j <= r - 1; j++)
   {
-    while (array[left_pointer] < pivot)
-      left_pointer += 1;
-
-    while (array[right_pointer] > pivot)
-      right_pointer -= 1;
-
-    if (left_pointer >= right_pointer)
-      break;
-    else
-      swap(&array[left_pointer], &array[right_pointer]);
+    if (arr[j] <= x)
+    {
+      swap(&arr[i], &arr[j]);
+      i++;
+    }
   }
-
-  swap(&array[left_pointer], &array[pivot_position]);
-
-  return left_pointer;
+  swap(&arr[i], &arr[r]);
+  return i;
 }
 
-double quickselect(double *array, int left_index, int right_index, int kth_lowest_value)
+double quickselect(double *arr, int l, int r, int k)
 {
-  if (right_index <= left_index)
-    return array[left_index];
+  if (k > 0 && k <= r - l + 1)
+  {
 
-  int pivot_position = partition(array, left_index, right_index);
+    int index = partition(arr, l, r);
 
-  if (kth_lowest_value < pivot_position)
-    return quickselect(array, kth_lowest_value, left_index, pivot_position - 1);
+    if (index - l == k - 1)
+      return arr[index];
 
-  else if (kth_lowest_value > pivot_position)
-    return quickselect(array, kth_lowest_value, pivot_position + 1, right_index);
+    if (index - l > k - 1)
+      return quickselect(arr, l, index - 1, k);
 
-  else
-    return array[pivot_position];
+    return quickselect(arr, index + 1, r,
+                       k - index + l - 1);
+  }
+  return 0;
 }
