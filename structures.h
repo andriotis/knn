@@ -1,15 +1,9 @@
 #ifndef STRUCTURES_H
 #define STRUCTURES_H
 
-typedef struct Point
+typedef struct
 {
-    double *value;
-    int idx;
-} Point;
-
-typedef struct Set
-{
-    double **points;
+    int *ids;
     int size;
 } Set;
 
@@ -27,7 +21,13 @@ typedef struct VPTree
     struct VPTree *outer;
 } VPTree;
 
-void make_space(Set *S, int size);
-void change_space(Set *S, int size);
+typedef struct
+{
+    int start;
+    int end;
+    Set *X;
+    double *distances;
+    double *distances_copy;
+} DistThreadArgs;
 
 #endif
