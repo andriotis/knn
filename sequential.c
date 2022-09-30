@@ -5,9 +5,9 @@
 
 int n = 8;
 int d = 2;
-double **S;
+double **original_set;
 
-VPTree *make_vp_tree(double **original_set, int *ids, int size)
+VPTree *make_vp_tree(int *ids, int size)
 {
     if (size == 0)
         return NULL;
@@ -21,7 +21,7 @@ VPTree *make_vp_tree(double **original_set, int *ids, int size)
 
     for (int i = 0; i < size - 1; i++)
     {
-        double dist = euclidean_dist(original_set[ids[i]], original_set[node->idx]);
+        double dist = euclidean_dist(original_set[ids[i]], original_set[ids[size - 1]]);
         distances[i] = dist;
         distances_copy[i] = dist;
     }
@@ -50,8 +50,8 @@ VPTree *make_vp_tree(double **original_set, int *ids, int size)
     L = (int *)realloc(L, L_sz * sizeof(int));
     R = (int *)realloc(R, R_sz * sizeof(int));
 
-    node->inner = make_vp_tree(original_set, L, L_sz);
-    node->outer = make_vp_tree(original_set, R, R_sz);
+    node->inner = make_vp_tree(L, L_sz);
+    node->outer = make_vp_tree(R, R_sz);
 
     return node;
 }
@@ -60,20 +60,20 @@ int main()
 {
     srand(42);
 
-    S = (double **)malloc(n * sizeof(double *));
-    int *ids = (int *)malloc(n * sizeof(int));
+    original_set = (double **)malloc(n * sizeof(double *));
+    int *original_ids = (int *)malloc(n * sizeof(int));
 
     for (int i = 0; i < n; i++)
     {
-        S[i] = (double *)malloc(d * sizeof(double));
-        ids[i] = i;
+        original_set[i] = (double *)malloc(d * sizeof(double));
+        original_ids[i] = i;
     }
 
     for (int i = 0; i < n; i++)
         for (int j = 0; j < d; j++)
-            S[i][j] = (double)rand() / RAND_MAX;
+            original_set[i][j] = (double)rand() / RAND_MAX;
 
-    VPTree *root = make_vp_tree(S, ids, n);
+    VPTree *root = make_vp_tree(original_ids, n);
 
     return 0;
 }
