@@ -6,7 +6,6 @@
 int n = 8;
 int d = 2;
 double **S;
-int *ids;
 
 VPTree *make_vp_tree(double **original_set, int *ids, int size)
 {
@@ -62,7 +61,7 @@ int main()
     srand(42);
 
     S = (double **)malloc(n * sizeof(double *));
-    ids = (int *)malloc(n * sizeof(int));
+    int *ids = (int *)malloc(n * sizeof(int));
 
     for (int i = 0; i < n; i++)
     {
