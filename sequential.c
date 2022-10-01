@@ -12,28 +12,22 @@ extern double *distances;
 VPTree *make_vp_tree(Set X)
 {
     if (X.end < X.start)
+    {
+        printf("NULL\n");
         return NULL;
-    printf("%d,%d\n", X.start, X.end);
+    }
+
     VPTree *node = (VPTree *)malloc(sizeof(VPTree));
 
     node->idx = X.end;
     node->vp = points[X.end];
 
-    for (int i = X.start; i < X.end; i++)
-        distances[i] = euclidean_dist(points[i], points[X.end]);
-
+    calc_dist_seq(X);
     node->md = get_median(X);
-    // Set to split in L and R
-    Set S = {X.start, X.end - 1};
-    int set_size = S.end - S.start + 1;
 
-    // Find inner set's bounds
-    Set L = {S.start, S.start + (set_size / 2) - 1};
-
-    // Find outer set's bounds
-    Set R = {L.end + 1, S.end};
+    Set L = {X.start, (X.start + X.end) / 2 - 1};
+    Set R = {(X.start + X.end) / 2, X.end - 1};
 
     node->inner = make_vp_tree(L);
     node->outer = make_vp_tree(R);
-    return node;
 }

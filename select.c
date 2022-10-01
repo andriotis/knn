@@ -67,3 +67,13 @@ Point select_best_vp(Set S)
 
     return best_p;
 }
+
+// // Set to split in L and R
+// Set S = {X.start, X.end - 1};
+// int set_size = S.end - S.start + 1;
+
+// // Find inner set's bounds
+// Set L = {S.start, S.start + (set_size / 2) - 1};
+
+// // Find outer set's bounds
+// Set R = {L.end + 1, S.end};
