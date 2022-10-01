@@ -3,44 +3,54 @@
 #include <stdlib.h>
 #include <limits.h>
 
-void swap(double *a, double *b)
+extern double **points;
+extern double *distances;
+
+void point_swap(double **a, double **b)
+{
+  double *temp = *a;
+  *a = *b;
+  *b = temp;
+}
+
+void dist_swap(double *a, double *b)
 {
   double temp = *a;
   *a = *b;
   *b = temp;
 }
 
-int partition(double *arr, int l, int r)
+int partition(int l, int r)
 {
-  double x = arr[r];
+  double x = distances[r];
   int i = l;
   for (int j = l; j <= r - 1; j++)
   {
-    if (arr[j] <= x)
+    if (distances[j] <= x)
     {
-      swap(&arr[i], &arr[j]);
+      dist_swap(&distances[i], &distances[j]);
+      point_swap(&points[i], &points[j]);
       i++;
     }
   }
-  swap(&arr[i], &arr[r]);
+  dist_swap(&distances[i], &distances[r]);
+  point_swap(&points[i], &points[r]);
   return i;
 }
 
-double quickselect(double *arr, int l, int r, int k)
+double quickselect(int l, int r, int k)
 {
   if (k > 0 && k <= r - l + 1)
   {
-
-    int index = partition(arr, l, r);
+    int index = partition(l, r);
 
     if (index - l == k - 1)
-      return arr[index];
+      return distances[index];
 
     if (index - l > k - 1)
-      return quickselect(arr, l, index - 1, k);
+      return quickselect(l, index - 1, k);
 
-    return quickselect(arr, index + 1, r,
-                       k - index + l - 1);
+    return quickselect(index + 1, r, k - index + l - 1);
   }
   return 0;
 }

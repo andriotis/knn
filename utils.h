@@ -1,7 +1,10 @@
 #ifndef UTILS_H
 #define UTILS_H
+#include "structures.h"
 
-double euclidean_dist(double *point1, double *point2);
-double get_median(double *data, int size);
+void print_everything(Set X);
+double euclidean_dist(double *a, double *b);
+double get_median(Set X);
+void calc_dist_seq(Set X);
 
 #endif

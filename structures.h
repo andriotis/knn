@@ -3,8 +3,8 @@
 
 typedef struct
 {
-    int *ids;
-    int size;
+    int start;
+    int end;
 } Set;
 
 typedef struct VPTree
