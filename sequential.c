@@ -7,48 +7,33 @@
 extern int n;
 extern int d;
 extern double **points;
+extern double *distances;
 
-void make_vp_tree(VPTree *node, Set X)
+VPTree *make_vp_tree(Set X)
 {
-    printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~Start~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-    printf("start : %d & end : %d\n", X.start, X.end);
+    if (X.end < X.start)
+        return NULL;
+    printf("%d,%d\n", X.start, X.end);
+    VPTree *node = (VPTree *)malloc(sizeof(VPTree));
 
-    if (X.start == X.end)
-    {
-        node->idx = X.end;
-        node->md = 0;
-        node->vp = points[X.end];
-        node->inner = NULL;
-        node->outer = NULL;
-    }
-    else
-    {
-        double *distances = (double *)malloc((X.end - X.start) * sizeof(double));
-        for (int i = X.start; i < X.end; i++)
-        {
-            printf("%d ( ", i);
-            distances[i] = euclidean_dist(points[i], points[X.end]);
-            for (int j = 0; j < d; j++)
-                printf("%.2f ", points[i][j]);
-            printf(") => %.2f\n", distances[i]);
-        }
+    node->idx = X.end;
+    node->vp = points[X.end];
 
-        node->md = get_median(distances, X.end - X.start);
+    for (int i = X.start; i < X.end; i++)
+        distances[i] = euclidean_dist(points[i], points[X.end]);
 
-        printf("REACHED HERE\n");
-        // // Find inner set's bounds
-        Set L;
-        L.start = X.start;
-        L.end = (X.end - X.start) / 2 - 1;
-        // // Find outer set's bounds
-        Set R;
-        R.start = L.end + 1;
-        R.end = X.end - 1;
+    node->md = get_median(X);
+    // Set to split in L and R
+    Set S = {X.start, X.end - 1};
+    int set_size = S.end - S.start + 1;
 
-        printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~End~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-        // node->inner = (VPTree *)malloc(sizeof(VPTree));
-        make_vp_tree(node->inner, L);
-        // node->outer = (VPTree *)malloc(sizeof(VPTree));
-        make_vp_tree(node->outer, R);
-    }
+    // Find inner set's bounds
+    Set L = {S.start, S.start + (set_size / 2) - 1};
+
+    // Find outer set's bounds
+    Set R = {L.end + 1, S.end};
+
+    node->inner = make_vp_tree(L);
+    node->outer = make_vp_tree(R);
+    return node;
 }

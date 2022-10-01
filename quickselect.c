@@ -4,6 +4,7 @@
 #include <limits.h>
 
 extern double **points;
+extern double *distances;
 
 void point_swap(double **a, double **b)
 {
@@ -19,7 +20,7 @@ void dist_swap(double *a, double *b)
   *b = temp;
 }
 
-int partition(double *distances, int l, int r)
+int partition(int l, int r)
 {
   double x = distances[r];
   int i = l;
@@ -28,33 +29,28 @@ int partition(double *distances, int l, int r)
     if (distances[j] <= x)
     {
       dist_swap(&distances[i], &distances[j]);
-      // point_swap(&points[i], &points[j]);
+      point_swap(&points[i], &points[j]);
       i++;
     }
   }
   dist_swap(&distances[i], &distances[r]);
-  // point_swap(&points[i], &points[r]);
+  point_swap(&points[i], &points[r]);
   return i;
 }
 
-double quickselect(double *distances, int l, int r, int k)
+double quickselect(int l, int r, int k)
 {
   if (k > 0 && k <= r - l + 1)
   {
-
-    int index = partition(distances, l, r);
+    int index = partition(l, r);
 
     if (index - l == k - 1)
       return distances[index];
 
     if (index - l > k - 1)
-      return quickselect(distances,
-                         l, index - 1,
-                         k);
+      return quickselect(l, index - 1, k);
 
-    return quickselect(distances,
-                       index + 1, r,
-                       k - index + l - 1);
+    return quickselect(index + 1, r, k - index + l - 1);
   }
   return 0;
 }

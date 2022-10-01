@@ -6,7 +6,6 @@
 #include "structures.h"
 
 extern int d;
-extern double **points;
 
 /* Given 2 points, it returns the euclidean distance between them */
 double euclidean_dist(double *a, double *b)
@@ -19,9 +18,11 @@ double euclidean_dist(double *a, double *b)
 
 // TODO: Check if else statement can be avoided. See process_distribution repo on github
 /* Given an array, it returns the median of the values in it */
-double get_median(double *distances, int size)
+double get_median(Set X)
 {
-  return (quickselect(distances, 0, size - 1, (size / 2) + 1) +
-          quickselect(distances, 0, size - 1, ((size - 1) / 2) + 1)) /
+  int size = X.end - X.start + 1;
+
+  return (quickselect(X.start, size - 1, size / 2 + 1) +
+          quickselect(X.start, size - 1, (size - 1) / 2 + 1)) /
          2;
 }
