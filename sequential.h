@@ -2,6 +2,6 @@
 #define SEQUENTIAL_H
 #include "structures.h"
 
-VPTree *make_vp_tree(Set *X);
+void make_vp_tree(VPTree *node, Set X);
 
 #endif

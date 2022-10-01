@@ -2,60 +2,53 @@
 #include <stdlib.h>
 #include "structures.h"
 #include "utils.h"
+#include "quickselect.h"
 
 extern int n;
 extern int d;
 extern double **points;
 
-VPTree *make_vp_tree(Set *X)
+void make_vp_tree(VPTree *node, Set X)
 {
+    printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~Start~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+    printf("start : %d & end : %d\n", X.start, X.end);
 
-    if (X->size == 0)
-        return NULL;
-
-    VPTree *node;
-    node = (VPTree *)malloc(sizeof(VPTree));
-    node->idx = X->ids[X->size - 1];
-
-    double *distances = (double *)malloc((X->size - 1) * sizeof(double));
-    double *distances_copy = (double *)malloc((X->size - 1) * sizeof(double));
-
-    for (int i = 0; i < X->size - 1; i++)
+    if (X.start == X.end)
     {
-        double dist = euclidean_dist(points[X->ids[i]],
-                                     points[X->ids[X->size - 1]]);
-        distances[i] = dist;
-        distances_copy[i] = dist;
+        node->idx = X.end;
+        node->md = 0;
+        node->vp = points[X.end];
+        node->inner = NULL;
+        node->outer = NULL;
     }
-
-    node->md = get_median(distances_copy, X->size - 1);
-
-    Set *L = (Set *)malloc(sizeof(Set));
-    L->ids = (int *)malloc((X->size - 1) * sizeof(int));
-    L->size = 0;
-    Set *R = (Set *)malloc(sizeof(Set));
-    R->ids = (int *)malloc((X->size - 1) * sizeof(int));
-    R->size = 0;
-
-    for (int i = 0; i < X->size - 1; i++)
+    else
     {
-        if (distances[i] < node->md)
+        double *distances = (double *)malloc((X.end - X.start) * sizeof(double));
+        for (int i = X.start; i < X.end; i++)
         {
-            L->ids[L->size] = X->ids[i];
-            L->size++;
+            printf("%d ( ", i);
+            distances[i] = euclidean_dist(points[i], points[X.end]);
+            for (int j = 0; j < d; j++)
+                printf("%.2f ", points[i][j]);
+            printf(") => %.2f\n", distances[i]);
         }
-        else
-        {
-            R->ids[R->size] = X->ids[i];
-            R->size++;
-        }
+
+        node->md = get_median(distances, X.end - X.start);
+
+        printf("REACHED HERE\n");
+        // // Find inner set's bounds
+        Set L;
+        L.start = X.start;
+        L.end = (X.end - X.start) / 2 - 1;
+        // // Find outer set's bounds
+        Set R;
+        R.start = L.end + 1;
+        R.end = X.end - 1;
+
+        printf("~~~~~~~~~~~~~~~~~~~~~~~~~~~~End~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+        // node->inner = (VPTree *)malloc(sizeof(VPTree));
+        make_vp_tree(node->inner, L);
+        // node->outer = (VPTree *)malloc(sizeof(VPTree));
+        make_vp_tree(node->outer, R);
     }
-
-    L->ids = (int *)realloc(L->ids, L->size * sizeof(int));
-    R->ids = (int *)realloc(R->ids, R->size * sizeof(int));
-
-    node->inner = make_vp_tree(L);
-    node->outer = make_vp_tree(R);
-
-    return node;
 }
