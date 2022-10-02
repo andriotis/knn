@@ -5,9 +5,22 @@
 #include "quickselect.h"
 #include "structures.h"
 
-extern int d;
+extern int n, d;
 extern double **points;
 extern double *distances;
+
+void initialize(double ***points, double **distances)
+{
+  *points = (double **)malloc(n * sizeof(double *));
+  *distances = (double *)malloc(n * sizeof(double));
+
+  for (int i = 0; i < n; i++)
+    (*points)[i] = (double *)malloc(d * sizeof(double));
+
+  for (int i = 0; i < n; i++)
+    for (int j = 0; j < d; j++)
+      (*points)[i][j] = (double)rand() / RAND_MAX;
+}
 
 double euclidean_dist(double *a, double *b)
 {

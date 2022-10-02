@@ -12,10 +12,7 @@ extern double *distances;
 VPTree *make_vp_tree(Set X)
 {
     if (X.end < X.start)
-    {
-        printf("NULL\n");
         return NULL;
-    }
 
     VPTree *node = (VPTree *)malloc(sizeof(VPTree));
 
