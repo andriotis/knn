@@ -1,125 +1,84 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
-#include <sys/types.h>
 #include "utils.h"
 #include "structures.h"
 
 extern int n;
 extern int d;
-
-extern double **points;
-
 extern int t;
 
-// Read below to understand
-// https://stackoverflow.com/questions/36688900/divide-an-uneven-number-between-threads
+extern double **points;
+extern double *distances;
 
-DistThreadArgs *getDistThreadArg(int num_threads, Set *X, double *distances, double *distances_copy)
+DistArgs *calc_dist_args(Set X)
 {
-    DistThreadArgs *params = (DistThreadArgs *)malloc(num_threads * sizeof(DistThreadArgs));
-    // to num_threads einai to extern int t ektos kai an thes na allazei kathe fora
-    int *num_points_per_thread = (int *)calloc(num_threads, sizeof(int));
-
-    // Set params params for every thread
+    DistArgs *args = (DistArgs *)malloc(t * sizeof(DistArgs));
     for (int i = 0; i < t; i++)
     {
-        // Point to set and distances arrays
-        params[i].X = X;
-        params[i].distances = distances;
-        params[i].distances_copy = distances_copy;
+        args[i].num_points = (X.end - X.start) / t;
+        if (i < (X.end - X.start) % t)
+            args[i].num_points++;
 
-        // Calculate the number of points each thread should handle (when computing distances)
-        num_points_per_thread[i] = (params[i].X->size - 1) / num_threads;
-        // Assign remaining points to threads (one point to each thread until no points remain)
-        if (i < (params[i].X->size - 1) % num_threads)
-            num_points_per_thread[i] += 1;
-
-        // Calc start index for every thread)
-        params[i].start = 0;
+        args[i].start = 0;
         for (int j = 0; j < i; j++)
-            params[i].start += num_points_per_thread[j];
-
-        // Calculate end index of each thread
-        params[i].end = params[i].start + num_points_per_thread[i];
+            args[i].start += args[j].num_points;
     }
-
-    return params;
+    return args;
 }
 
-void *calc_distances_parallel(void *params)
+void *calc_dist_par(void *args)
 {
-    DistThreadArgs *args = (DistThreadArgs *)params;
-    for (int i = args->start; i < args->end; i++)
+    DistArgs *b = (DistArgs *)args;
+    for (int i = b->start; i < b->start + b->num_points; i++)
+        distances[i] = euclidean_dist(points[i], points[b->vp_idx]);
+}
+
+void *routine(void *args);
+
+void make_vp_tree(VPTree *node, Set X)
+{
+    if (X.end < X.start)
     {
-        double dist = euclidean_dist(points[args->X->ids[i]],
-                                     points[args->X->ids[args->X->size - 1]]);
-        args->distances[i] = dist;
-        args->distances_copy[i] = dist;
+        printf("NULL\n");
+        return;
     }
-}
-
-VPTree *make_vp_tree(Set *X)
-{
-    // Stop exeution where no points are left in the set
-    if (X->size == 0)
-        return NULL;
-
-    // Initialize tree node and set the vantage point as the last point in the set
-    VPTree *node;
+    printf("%d, %d\n", X.start, X.end);
     node = (VPTree *)malloc(sizeof(VPTree));
-    node->idx = X->ids[X->size - 1];
 
-    // Allocate space to store distances and a copy of them
-    double *distances = (double *)malloc((X->size - 1) * sizeof(double));
-    double *distances_copy = (double *)malloc((X->size - 1) * sizeof(double));
+    node->idx = X.end;
+    node->vp = points[X.end];
 
-    //  Allocate threads responsible for calculating distances
-    pthread_t *th = (pthread_t *)malloc(t * sizeof(pthread_t));
-
-    // Calculate parms for the distance calculation routine called by every thread
-    DistThreadArgs *params = getDistThreadArg(t, X, distances, distances_copy);
-
-    // Every thread starts calculating distances for its assigned points
+    pthread_t *threads = (pthread_t *)malloc(t * sizeof(pthread_t));
+    DistArgs *d_args = calc_dist_args(X);
     for (int i = 0; i < t; i++)
-        pthread_create(&th[i], NULL, &calc_distances_parallel, (void *)&params[i]);
-
-    for (int i = 0; i < t; i++)
-        pthread_join(th[i], NULL);
-
-    // Find median distance and assign it as a node attribute
-    node->md = get_median(distances_copy, X->size - 1);
-
-    // Iinitalize data for Inner and Outer subsets
-    Set *L = (Set *)malloc(sizeof(Set));
-    L->ids = (int *)malloc((X->size - 1) * sizeof(int));
-    L->size = 0;
-    Set *R = (Set *)malloc(sizeof(Set));
-    R->ids = (int *)malloc((X->size - 1) * sizeof(int));
-    R->size = 0;
-
-    //  Assign points to inner and outer sets based on median distance
-    for (int i = 0; i < X->size - 1; i++)
     {
-        if (distances[i] < node->md)
-        {
-            L->ids[L->size] = X->ids[i];
-            L->size++;
-        }
-        else
-        {
-            R->ids[R->size] = X->ids[i];
-            R->size++;
-        }
+        pthread_create(&threads[i], NULL, &calc_dist_par, &d_args[i]);
+        pthread_join(threads[i], NULL);
     }
 
-    // Reallocate space for Inner and Outer set (ids) to hold only the memory they need
-    L->ids = (int *)realloc(L->ids, L->size * sizeof(int));
-    R->ids = (int *)realloc(R->ids, R->size * sizeof(int));
+    node->md = get_median(X);
 
-    // Construct vp_tree for Inner and Outer sets
-    node->inner = make_vp_tree(L);
-    node->outer = make_vp_tree(R);
+    Set L = {X.start, (X.start + X.end) / 2 - 1};
+    Set R = {(X.start + X.end) / 2, X.end - 1};
 
-    return node;
+    // CHANGE WITH PTHREADS
+    // -------------------------------------------------------------
+
+    pthread_t thread;
+    TreeArgs *t_args = (TreeArgs *)malloc(sizeof(TreeArgs));
+    t_args->node = node->inner;
+    t_args->X = L;
+    pthread_create(&thread, NULL, &routine, &t_args);
+    // pthread_detach(&thread);
+    // make_vp_tree(node->inner, L);
+    make_vp_tree(node->outer, R);
+    pthread_join(thread, NULL);
+    // -------------------------------------------------------------
+}
+
+void *routine(void *args)
+{
+    TreeArgs *b = (TreeArgs *)args;
+    make_vp_tree(b->node->inner, b->X);
 }

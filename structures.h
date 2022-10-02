@@ -24,10 +24,13 @@ typedef struct VPTree
 typedef struct
 {
     int start;
-    int end;
-    Set *X;
-    double *distances;
-    double *distances_copy;
-} DistThreadArgs;
+    int num_points;
+    int vp_idx;
+} DistArgs;
 
+typedef struct
+{
+    Set X;
+    VPTree *node;
+} TreeArgs;
 #endif
