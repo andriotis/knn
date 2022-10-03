@@ -3,9 +3,9 @@
 #include "structures.h"
 
 void *calc_distances_parallel(void *params);
-DistArgs *calc_dist_args(Set X);
+DistArgs *calc_dist_args(Set X, int t);
 void *calc_dist_par(void *args);
 void *routine(void *args);
-void *make_vp_tree(VPTree *node, Set X);
+void par_make_vp_tree(VPTree *node, Set X);
 
 #endif
