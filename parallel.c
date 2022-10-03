@@ -11,6 +11,10 @@ extern int t;
 extern double **points;
 extern double *distances;
 
+DistArgs *calc_dist_args(Set X);
+void *calc_dist_par(void *args);
+void *routine(void *args);
+
 DistArgs *calc_dist_args(Set X)
 {
     DistArgs *args = (DistArgs *)malloc(t * sizeof(DistArgs));
@@ -29,20 +33,15 @@ DistArgs *calc_dist_args(Set X)
 
 void *calc_dist_par(void *args)
 {
-    DistArgs *b = (DistArgs *)args;
-    for (int i = b->start; i < b->start + b->num_points; i++)
-        distances[i] = euclidean_dist(points[i], points[b->vp_idx]);
+    DistArgs *chunk = (DistArgs *)args;
+    for (int i = chunk->start; i < chunk->start + chunk->num_points; i++)
+        distances[i] = euclidean_dist(points[i], points[chunk->vp_idx]);
 }
-
-void *routine(void *args);
 
 void make_vp_tree(VPTree *node, Set X)
 {
     if (X.end < X.start)
-    {
-        printf("NULL\n");
         return;
-    }
     printf("%d, %d\n", X.start, X.end);
     node = (VPTree *)malloc(sizeof(VPTree));
 
@@ -50,6 +49,7 @@ void make_vp_tree(VPTree *node, Set X)
     node->vp = points[X.end];
 
     pthread_t *threads = (pthread_t *)malloc(t * sizeof(pthread_t));
+
     DistArgs *d_args = calc_dist_args(X);
     for (int i = 0; i < t; i++)
     {
@@ -62,23 +62,21 @@ void make_vp_tree(VPTree *node, Set X)
     Set L = {X.start, (X.start + X.end) / 2 - 1};
     Set R = {(X.start + X.end) / 2, X.end - 1};
 
-    // CHANGE WITH PTHREADS
-    // -------------------------------------------------------------
-
-    pthread_t thread;
+    pthread_t *inner_thread = (pthread_t *)malloc(sizeof(pthread_t));
     TreeArgs *t_args = (TreeArgs *)malloc(sizeof(TreeArgs));
+
     t_args->node = node->inner;
     t_args->X = L;
-    pthread_create(&thread, NULL, &routine, &t_args);
-    // pthread_detach(&thread);
-    // make_vp_tree(node->inner, L);
+
+    pthread_create(inner_thread, NULL, &routine, t_args);
+    pthread_detach(*inner_thread);
+
     make_vp_tree(node->outer, R);
-    pthread_join(thread, NULL);
-    // -------------------------------------------------------------
 }
 
 void *routine(void *args)
 {
-    TreeArgs *b = (TreeArgs *)args;
-    make_vp_tree(b->node->inner, b->X);
+    TreeArgs *t_args = (TreeArgs *)args;
+    make_vp_tree(t_args->node, t_args->X);
+    pthread_exit(NULL);
 }

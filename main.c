@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include "parallel.h"
+// #include "sequential.h"
 #include <time.h>
 #include "utils.h"
 #include <pthread.h>
