@@ -1,40 +1,63 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include "structures.h"
 #include "utils.h"
 #include "quickselect.h"
-extern int counter;
+
 extern int n;
 extern int d;
 
 extern double **points;
 extern double *distances;
 
-void seq_make_vp_tree(VPTree *node, Set X)
+void make_vp_tree(VPTree *node, Set X)
 {
-    printf("entered vp_tree with %d, %d\n", X.start, X.end);
-    node = (VPTree *)malloc(sizeof(VPTree));
     node->idx = X.end;
     node->vp = points[X.end];
-    if (X.start == X.end)
-    {
-        printf("HIT\n");
-        node->inner = node->outer = NULL;
-        node->md = 0;
-        return;
-    }
-    if (X.end < X.start)
-    {
-        printf("inside < if\n");
-        return;
-    }
+    node->md = 0;
+    node->inner = node->outer = NULL;
 
-    calc_dist_seq(X);
+    if (X.start == X.end)
+        return;
+
+    for (int i = X.start; i < X.end; i++)
+        distances[i] = euclidean_dist(points[i], node->vp);
+
     node->md = get_median(X);
 
     Set L = {X.start, (X.start + X.end) / 2 - 1};
     Set R = {(X.start + X.end) / 2, X.end - 1};
 
-    seq_make_vp_tree(node->inner, L);
-    seq_make_vp_tree(node->outer, R);
+    node->outer = (VPTree *)malloc(sizeof(VPTree));
+    make_vp_tree(node->outer, R);
+
+    if (L.end < L.start)
+        return;
+
+    node->inner = (VPTree *)malloc(sizeof(VPTree));
+    make_vp_tree(node->inner, L);
+}
+
+extern double tau;
+extern int best;
+
+void search(VPTree *node, double *query)
+{
+    if (node == NULL)
+        return;
+    double x = euclidean_dist(query, node->vp);
+    printf("query distance from current pivot is %f\n", x);
+    if (x < tau)
+    {
+        tau = x;
+        best = node->idx;
+    }
+
+    printf("tau is %f and best is %d\n", tau, best);
+    printf("radius is %f\n", node->md);
+    if (x > node->md)
+        search(node->outer, query);
+    else
+        search(node->inner, query);
 }

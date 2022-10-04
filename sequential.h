@@ -2,6 +2,6 @@
 #define SEQUENTIAL_H
 #include "structures.h"
 
-void seq_make_vp_tree(VPTree *node, Set X);
-
+void make_vp_tree(VPTree *node, Set X);
+void search(VPTree *node, double *query);
 #endif
