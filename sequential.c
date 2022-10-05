@@ -10,54 +10,73 @@ extern int d;
 
 extern double **points;
 extern double *distances;
+extern double *query;
+
+extern double tau;
+extern int vp_best;
 
 void make_vp_tree(VPTree *node, Set X)
 {
     node->idx = X.end;
-    node->vp = points[X.end];
-    node->md = 0;
     node->inner = node->outer = NULL;
+    node->S.start = X.start;
+    node->S.end = X.end - 1;
 
     if (X.start == X.end)
         return;
 
     for (int i = X.start; i < X.end; i++)
-        distances[i] = euclidean_dist(points[i], node->vp);
+        distances[i] = euclidean_dist(points[i], points[node->idx]);
 
-    node->md = get_median(X);
+    double md = get_median(X);
 
-    Set L = {X.start, (X.start + X.end) / 2 - 1};
-    Set R = {(X.start + X.end) / 2, X.end - 1};
-
+    Set R = {(X.start + X.end) / 2,
+             X.end - 1,
+             quickselect(R.start, R.end, 1),
+             quickselect(R.start, R.end, R.end - R.start + 1)};
+    node->R = R;
     node->outer = (VPTree *)malloc(sizeof(VPTree));
-    make_vp_tree(node->outer, R);
+    make_vp_tree(node->outer, node->R);
+
+    Set L = {X.start,
+             (X.start + X.end) / 2 - 1,
+             quickselect(L.start, L.end, 1),
+             quickselect(L.start, L.end, L.end - L.start + 1)};
 
     if (L.end < L.start)
         return;
 
+    node->L = L;
     node->inner = (VPTree *)malloc(sizeof(VPTree));
-    make_vp_tree(node->inner, L);
+    make_vp_tree(node->inner, node->L);
 }
 
-extern double tau;
-extern int best;
-
-void search(VPTree *node, double *query)
+void search(VPTree *node)
 {
     if (node == NULL)
         return;
-    double x = euclidean_dist(query, node->vp);
-    printf("query distance from current pivot is %f\n", x);
+
+    double x = euclidean_dist(query, points[node->idx]);
     if (x < tau)
     {
         tau = x;
-        best = node->idx;
+        vp_best = node->idx;
     }
 
-    printf("tau is %f and best is %d\n", tau, best);
-    printf("radius is %f\n", node->md);
-    if (x > node->md)
-        search(node->outer, query);
+    double middle = (node->L.high + node->R.low) / 2;
+
+    if (x < middle)
+    {
+        if (x > node->L.low - tau && x < node->L.high + tau)
+            search(node->inner);
+        if (x > node->R.low - tau && x < node->R.high + tau)
+            search(node->outer);
+    }
     else
-        search(node->inner, query);
+    {
+        if (x > node->R.low - tau && x < node->R.high + tau)
+            search(node->outer);
+        if (x > node->L.low - tau && x < node->L.high + tau)
+            search(node->inner);
+    }
 }

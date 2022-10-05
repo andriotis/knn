@@ -5,19 +5,17 @@ typedef struct
 {
     int start;
     int end;
+    double low;
+    double high;
 } Set;
 
 typedef struct VPTree
 {
-    // Vantage point
-    double *vp;
-    // Median distance of vp from all other points
-    double md;
-    // Index of vp in the original set
     int idx;
-    // Inner VP Tree (left child node)
+    Set S;
+    Set L;
+    Set R;
     struct VPTree *inner;
-    // Outer VP Tree (right child node)
     struct VPTree *outer;
 } VPTree;
 

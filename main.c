@@ -8,52 +8,50 @@
 #include "sequential.h"
 #include "utils.h"
 
-int n = 8, d = 2;
-double quickselect_time = 0;
-int MAX_THREADS;
+int n = 1000, d = 2;
+
+double tau = 1;
+int vp_best;
 
 double **points;
 double *distances;
-
-double tau = 10;
-int best;
+double *query;
 
 int main()
 {
-    srand(1);
-    double *query = (double *)malloc(d * sizeof(double));
-    for (int i = 0; i < d; i++)
-        query[i] = (double)rand() / RAND_MAX;
+    srand(53);
 
     initialize(&points, &distances);
 
-    int test_best;
-    double test_tau = 10;
-    double current_dist;
+    query = (double *)malloc(d * sizeof(double));
+    for (int i = 0; i < d; i++)
+        query[i] = (double)rand() / RAND_MAX;
+
+    double min = RAND_MAX;
+    int brute_best;
     for (int i = 0; i < n; i++)
     {
-        current_dist = euclidean_dist(query, points[i]);
-        printf("%f ", current_dist);
-        if (current_dist < test_tau)
+        if (euclidean_dist(query, points[i]) < min)
         {
-            test_tau = current_dist;
-            test_best = i;
+            min = euclidean_dist(query, points[i]);
+            brute_best = i;
         }
     }
-    printf("\nbrute said best is %d\n", test_best);
+
+    printf("brute nearest :\n");
+    printf("-------------\n");
+    printf("|%.3f %.3f|\n", points[brute_best][0], points[brute_best][1]);
+    printf("-------------\n");
 
     Set S = {0, n - 1};
+
     VPTree *root = (VPTree *)malloc(sizeof(VPTree));
-
-    clock_t begin = clock();
     make_vp_tree(root, S);
-    search(root, query);
-    clock_t end = clock();
-    printf("seq said best is %d\n", best);
-
-    double total_time = (double)(end - begin) / CLOCKS_PER_SEC;
-
-    // printf("Took %f of which quickselect took %.2f %%\n", total_time, (quickselect_time / total_time) * 100);
+    search(root);
+    printf("search nearest:\n");
+    printf("-------------\n");
+    printf("|%.3f %.3f|", points[vp_best][0], points[vp_best][1]);
+    printf("\n-------------\n");
 
     return EXIT_SUCCESS;
 }
