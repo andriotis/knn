@@ -6,3 +6,7 @@
 int num_points = 100;
 int dim = 2;
 double **corpus;
+
+int main()
+{
+}
