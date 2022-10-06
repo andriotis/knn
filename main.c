@@ -8,7 +8,7 @@
 #include "sequential.h"
 #include "utils.h"
 
-int n = 1000, d = 2;
+int n = 100000, d = 2;
 
 double tau = 1;
 int vp_best;
@@ -38,7 +38,7 @@ int main()
         }
     }
 
-    printf("brute nearest :\n");
+    printf("brute nearest:\n");
     printf("-------------\n");
     printf("|%.3f %.3f|\n", points[brute_best][0], points[brute_best][1]);
     printf("-------------\n");
