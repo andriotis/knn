@@ -30,22 +30,47 @@ void make_vp_tree(VPTree *node, Set X)
 
     double md = get_median(X);
 
-    Set R = {(X.start + X.end) / 2,
-             X.end - 1,
-             quickselect(R.start, R.end, 1),
-             quickselect(R.start, R.end, R.end - R.start + 1)};
+    double R_min = RAND_MAX;
+    double R_max = -RAND_MAX;
+
+    double current_distance;
+    for (int i = (X.start + X.end) / 2; i < X.end; i++)
+    {
+        current_distance = distances[i];
+        if (current_distance < R_min)
+            R_min = current_distance;
+        if (current_distance > R_max)
+            R_max = current_distance;
+    }
+
+    Set R = {
+        (X.start + X.end) / 2,
+        X.end - 1,
+        R_min,
+        R_max};
     node->R = R;
     node->outer = (VPTree *)malloc(sizeof(VPTree));
+
     make_vp_tree(node->outer, node->R);
 
-    Set L = {X.start,
-             (X.start + X.end) / 2 - 1,
-             quickselect(L.start, L.end, 1),
-             quickselect(L.start, L.end, L.end - L.start + 1)};
-
-    if (L.end < L.start)
+    if ((X.start + X.end) / 2 - 1 < X.start)
         return;
 
+    double L_min = RAND_MAX;
+    double L_max = -RAND_MAX;
+    for (int i = X.start; i < (X.start + X.end) / 2; i++)
+    {
+        if (distances[i] < L_min)
+            L_min = distances[i];
+        if (distances[i] > L_max)
+            L_max = distances[i];
+    }
+
+    Set L = {
+        X.start,
+        (X.start + X.end) / 2 - 1,
+        L_min,
+        L_max};
     node->L = L;
     node->inner = (VPTree *)malloc(sizeof(VPTree));
     make_vp_tree(node->inner, node->L);
