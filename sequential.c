@@ -19,8 +19,7 @@ void make_vp_tree(VPTree *node, Set X)
 {
     node->idx = X.end;
     node->inner = node->outer = NULL;
-    node->S.start = X.start;
-    node->S.end = X.end - 1;
+    node->low = node->high = 0;
 
     if (X.start == X.end)
         return;
@@ -60,10 +59,11 @@ void make_vp_tree(VPTree *node, Set X)
     double L_max = -RAND_MAX;
     for (int i = X.start; i < (X.start + X.end) / 2; i++)
     {
-        if (distances[i] < L_min)
-            L_min = distances[i];
-        if (distances[i] > L_max)
-            L_max = distances[i];
+        current_distance = distances[i];
+        if (current_distance < L_min)
+            L_min = current_distance;
+        if (current_distance > L_max)
+            L_max = current_distance;
     }
 
     Set L = {
@@ -88,7 +88,7 @@ void search(VPTree *node)
         vp_best = node->idx;
     }
 
-    double middle = (node->L.high + node->R.low) / 2;
+    double middle = (node->inner.high + node->outer.low) / 2;
 
     if (x < middle)
     {

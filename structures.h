@@ -5,16 +5,13 @@ typedef struct
 {
     int start;
     int end;
-    double low;
-    double high;
 } Set;
 
-typedef struct VPTree
+typedef struct
 {
     int idx;
-    Set S;
-    Set L;
-    Set R;
+    double low;
+    double high;
     struct VPTree *inner;
     struct VPTree *outer;
 } VPTree;
