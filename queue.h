@@ -9,9 +9,9 @@ struct LinkedList
 };
 
 struct LinkedList *newNode(int id, double distance);
-int queue_size(struct LinkedList **head);
-struct LinkedList *peek(struct LinkedList **head);
 void pop(struct LinkedList **head);
 void push(struct LinkedList **head, int id, double distance);
+struct LinkedList *peek(struct LinkedList **head);
+int size(struct LinkedList **head);
 
 #endif

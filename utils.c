@@ -13,9 +13,10 @@ extern pthread_mutex_t mutex;
 extern double **points;
 extern double *distances;
 
-void initialize(double ***points, double **distances)
+void initialize(double ***points, double **query, double **distances)
 {
   *points = (double **)malloc(n * sizeof(double *));
+  *query = (double *)malloc(d * sizeof(double));
   *distances = (double *)malloc(n * sizeof(double));
 
   for (int i = 0; i < n; i++)
@@ -24,6 +25,9 @@ void initialize(double ***points, double **distances)
   for (int i = 0; i < n; i++)
     for (int j = 0; j < d; j++)
       (*points)[i][j] = (double)rand() / RAND_MAX;
+
+  for (int i = 0; i < d; i++)
+    (*query)[i] = (double)rand() / RAND_MAX;
 }
 
 double euclidean_dist(double *a, double *b)
@@ -34,54 +38,15 @@ double euclidean_dist(double *a, double *b)
   return sqrt(dist);
 }
 
-double get_median(Set X)
+double get_median(int start, int end)
 {
-  return (quickselect(X.start, X.end - 1, (X.end - X.start - 1) / 2 + 1) +
-          quickselect(X.start, X.end - 1, (X.end - X.start) / 2 + 1)) /
+  return (quickselect(start, end - 1, (end - start - 1) / 2 + 1) +
+          quickselect(start, end - 1, (end - start) / 2 + 1)) /
          2;
 }
 
-void calc_dist_seq(Set X)
+void calc_dist_seq(int start, int end)
 {
-  for (int i = X.start; i < X.end; i++)
-    distances[i] = euclidean_dist(points[i], points[X.end]);
+  for (int i = start; i < end; i++)
+    distances[i] = euclidean_dist(points[i], points[end]);
 }
-
-// void update_active_threads(int amount)
-// {
-//   pthread_mutex_lock(&mutex);
-//   active_threads += amount;
-//   pthread_mutex_unlock(&mutex);
-// }
-
-// DistArgs *calc_dist_args(Set X, int t)
-// {
-//   DistArgs *args = (DistArgs *)malloc(t * sizeof(DistArgs));
-//   for (int i = 0; i < t; i++)
-//   {
-//     args[i].num_points = (X.end - X.start) / t;
-//     if (i < (X.end - X.start) % t)
-//       args[i].num_points++;
-
-//     args[i].start = 0;
-//     for (int j = 0; j < i; j++)
-//       args[i].start += args[j].num_points;
-//   }
-//   return args;
-// }
-
-// void *calc_dist_par(void *args)
-// {
-//   DistArgs *d_args = (DistArgs *)args;
-//   for (int i = d_args->start; i < d_args->start + d_args->num_points; i++)
-//     distances[i] = euclidean_dist(points[i], points[d_args->vp_idx]);
-// }
-
-// void *routine(void *args)
-// {
-//   TreeArgs *t_args = (TreeArgs *)args;
-//   par_make_vp_tree(t_args->node, t_args->X);
-//   update_active_threads(-1);
-//   pthread_exit(NULL);
-//   return;
-// }

@@ -63,3 +63,42 @@ void par_make_vp_tree(VPTree *node, Set X)
 
     seq_make_vp_tree(node->inner, L);
 }
+
+// void update_active_threads(int amount)
+// {
+//   pthread_mutex_lock(&mutex);
+//   active_threads += amount;
+//   pthread_mutex_unlock(&mutex);
+// }
+
+// DistArgs *calc_dist_args(Set X, int t)
+// {
+//   DistArgs *args = (DistArgs *)malloc(t * sizeof(DistArgs));
+//   for (int i = 0; i < t; i++)
+//   {
+//     args[i].num_points = (X.end - X.start) / t;
+//     if (i < (X.end - X.start) % t)
+//       args[i].num_points++;
+
+//     args[i].start = 0;
+//     for (int j = 0; j < i; j++)
+//       args[i].start += args[j].num_points;
+//   }
+//   return args;
+// }
+
+// void *calc_dist_par(void *args)
+// {
+//   DistArgs *d_args = (DistArgs *)args;
+//   for (int i = d_args->start; i < d_args->start + d_args->num_points; i++)
+//     distances[i] = euclidean_dist(points[i], points[d_args->vp_idx]);
+// }
+
+// void *routine(void *args)
+// {
+//   TreeArgs *t_args = (TreeArgs *)args;
+//   par_make_vp_tree(t_args->node, t_args->X);
+//   update_active_threads(-1);
+//   pthread_exit(NULL);
+//   return;
+// }

@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include "queue.h"
 
@@ -12,7 +11,7 @@ struct LinkedList *newNode(int id, double distance)
     return temp;
 }
 
-int queue_size(struct LinkedList **head)
+int size(struct LinkedList **head)
 {
     struct LinkedList *temp = *head;
     int count = 0;
