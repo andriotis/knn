@@ -32,7 +32,7 @@ void print_usage()
     printf("\nEXAMPLE\n");
     bold_off();
     printf("\nTo search the 4 nearest neighbors of a query amongst 1000 points of dimension 5 sequentially, type the following command:\n");
-    printf("\n\t./vp --n=1000 --d=5 --k=4 --sequential\n\n");
+    printf("\n\t./main --n=1000 --d=5 --k=4 --sequential\n\n");
 }
 
 void initialize_knn()
