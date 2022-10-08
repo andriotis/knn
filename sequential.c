@@ -1,17 +1,22 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+
 #include "structures.h"
 #include "utils.h"
-#include "quickselect.h"
 #include "queue.h"
 
-extern int n, d;
+// EXPERIMENT VARIABLES SHOULD BE GLOBAL
+extern int n, d, k;
+double **points;
+double *query;
+double *distances;
 extern double tau;
-extern double **points;
-extern double *distances;
-extern struct LinkedList *nearest;
 
+// RUNTIME VARIABLES SHOULD BE LOCAL
+struct LinkedList *nearest;
+
+// CONSTRUCT VP-TREE AND SEARCH IN SEQUENCE
 void make(VPTree *node, int start, int end)
 {
     node->idx = end;
@@ -37,7 +42,7 @@ void make(VPTree *node, int start, int end)
     make(node->inner, start, (start + end) / 2 - 1);
 }
 
-void search(VPTree *node, double *query, int k)
+void search(VPTree *node, double *query)
 {
     if (node == NULL)
         return;
@@ -56,15 +61,29 @@ void search(VPTree *node, double *query, int k)
     if (x < node->md)
     {
         if (x - tau <= node->md)
-            search(node->inner, query, k);
+            search(node->inner, query);
         if (x + tau >= node->md)
-            search(node->outer, query, k);
+            search(node->outer, query);
     }
     else
     {
         if (x + tau >= node->md)
-            search(node->outer, query, k);
+            search(node->outer, query);
         if (x - tau <= node->md)
-            search(node->inner, query, k);
+            search(node->inner, query);
     }
+}
+
+void run_sequential()
+{
+    VPTree *root = (VPTree *)malloc(sizeof(VPTree));
+    nearest = newNode(-1, RAND_MAX);
+    tau = RAND_MAX;
+
+    make(root, 0, n - 1);
+    clock_t start = clock();
+    search(root, query);
+    clock_t end = clock();
+
+    printf("Sequential took : %f\n", ((double)(end - start)) / CLOCKS_PER_SEC);
 }

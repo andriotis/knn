@@ -1,41 +1,137 @@
-#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/sysinfo.h>
-#include <time.h>
-#include <unistd.h>
+#include <getopt.h>
 
-#include "parallel.h"
-#include "queue.h"
+#include "main.h"
+
+#include "brute.h"
 #include "sequential.h"
-#include "structures.h"
-#include "utils.h"
+#include "parallel.h"
 
-int n = 100000000, d = 2;
-int k = 3;
-double tau = RAND_MAX;
-int MAX_THREADS, MIN_WORK_PER_THREAD = 1000;
-
+int n, d, k;
+double tau;
 double **points;
-double *distances;
 double *query;
-struct LinkedList *nearest;
+double *distances;
+void bold_on() { printf("\033[1m"); }
+void bold_off() { printf("\033[0m"); }
 
-int main() {
-  srand(42);
-  MAX_THREADS = 4;
-  initialize(&points, &query, &distances);
+void print_usage()
+{
+    bold_on();
+    printf("\nUSAGE\n");
+    bold_off();
+    printf("\t--n : number of points\n");
+    printf("\t--d : number of dimensions\n");
+    printf("\t--k : number of neighbors\n");
+    printf("\t--brute : bruteforce search\n");
+    printf("\t--sequential : sequential search\n");
+    printf("\t--parallel : parallel search\n");
+    printf("\t--all : all the three together search\n");
+    bold_on();
+    printf("\nEXAMPLE\n");
+    bold_off();
+    printf("\nTo search the 4 nearest neighbors of a query amongst 1000 points of dimension 5 sequentially, type the following command:\n");
+    printf("\n\t./vp --n=1000 --d=5 --k=4 --sequential\n\n");
+}
 
-  VPTree *root = (VPTree *)malloc(sizeof(VPTree));
-  make_vpt(root, 0, n - 1);
+void initialize_knn()
+{
+    // initialize points
+    points = malloc(n * sizeof(double *));
+    for (int i = 0; i < n; i++)
+        points[i] = malloc(d * sizeof(double));
 
-  nearest = newNode(-1, RAND_MAX);
-  search(root, query, k);
-  // for (int i = 0; i < n - 1; i++) printf("%f\n", distances[i]);
-  while (size(&nearest)) {
-    printf("%f\n", peek(&nearest)->distance);
-    pop(&nearest);
-  }
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < d; j++)
+            points[i][j] = (double)rand() / RAND_MAX;
 
-  return EXIT_SUCCESS;
+    // initialize query
+    query = malloc(d * sizeof(double));
+    for (int i = 0; i < d; i++)
+        query[i] = (double)rand() / RAND_MAX;
+
+    // initialize distances
+    distances = malloc(n * sizeof(double));
+}
+
+int main(int argc, char *argv[])
+{
+    int opt = 0;
+    int s = 0, p = 0, b = 0;
+    static struct option long_options[] = {
+        {"n", required_argument, 0, 'n'},
+        {"d", required_argument, 0, 'd'},
+        {"k", required_argument, 0, 'k'},
+        {"sequential", no_argument, 0, 's'},
+        {"parallel", no_argument, 0, 'p'},
+        {"brute", no_argument, 0, 'b'},
+        {"all", no_argument, 0, 'a'},
+        {"help", no_argument, 0, 'h'},
+        {0, 0, 0, 0},
+    };
+
+    int long_index = 0;
+    while ((opt = getopt_long(argc, argv, "",
+                              long_options, &long_index)) != -1)
+    {
+        switch (opt)
+        {
+        case 'n':
+            n = atoi(optarg);
+            break;
+        case 'd':
+            d = atoi(optarg);
+            break;
+        case 'k':
+            k = atoi(optarg);
+            break;
+        case 's':
+            s = 1;
+            break;
+        case 'p':
+            p = 1;
+            break;
+        case 'b':
+            b = 1;
+            break;
+        case 'a':
+            s = 1;
+            p = 1;
+            b = 1;
+            break;
+        case 'h':
+            print_usage();
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    if (long_index < 2)
+    {
+        print_usage();
+        return EXIT_FAILURE;
+    }
+    srand(42);
+    initialize_knn();
+
+    if (s == 1 && p == 0 && b == 0)
+    {
+        run_sequential();
+    }
+    else if (s == 0 && p == 1 && b == 0)
+    {
+        run_parallel();
+    }
+    else if (s == 0 && p == 0 && b == 1)
+    {
+        run_brute();
+    }
+    else
+    {
+        run_sequential();
+        run_parallel();
+        run_brute();
+    }
+
+    return EXIT_SUCCESS;
 }
