@@ -55,6 +55,13 @@ void initialize_knn()
     distances = malloc(n * sizeof(double));
 }
 
+void free_knn()
+{
+    free(points);
+    free(distances);
+    free(query);
+}
+
 int main(int argc, char *argv[])
 {
     int opt = 0;
@@ -111,26 +118,44 @@ int main(int argc, char *argv[])
         print_usage();
         return EXIT_FAILURE;
     }
-    srand(42);
-    initialize_knn();
 
     if (s == 1 && p == 0 && b == 0)
     {
+        srand(42);
+        initialize_knn();
         run_sequential();
+        free_knn();
     }
     else if (s == 0 && p == 1 && b == 0)
     {
+        srand(42);
+        initialize_knn();
         run_parallel();
+        free_knn();
     }
     else if (s == 0 && p == 0 && b == 1)
     {
+        srand(42);
+        initialize_knn();
         run_brute();
+        free_knn();
     }
     else
     {
+        srand(42);
+        initialize_knn();
         run_sequential();
+        free_knn();
+
+        srand(42);
+        initialize_knn();
         run_parallel();
+        free_knn();
+
+        srand(42);
+        initialize_knn();
         run_brute();
+        free_knn();
     }
 
     return EXIT_SUCCESS;

@@ -84,6 +84,5 @@ void run_sequential()
     clock_t start = clock();
     search(root, query);
     clock_t end = clock();
-
     printf("Sequential took : %f\n", ((double)(end - start)) / CLOCKS_PER_SEC);
 }

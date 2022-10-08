@@ -37,5 +37,5 @@ void run_brute()
         }
     }
     clock_t end = clock();
-    printf("brute took : %f\n", ((double)(end - start)) / CLOCKS_PER_SEC);
+    printf("Brute took : %f\n", ((double)(end - start)) / CLOCKS_PER_SEC);
 }

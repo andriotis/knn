@@ -3,5 +3,6 @@
 
 void initialize_knn();
 void print_usage();
+void free_knn();
 
 #endif
