@@ -13,14 +13,10 @@ double tau;
 double **points;
 double *query;
 double *distances;
-void bold_on() { printf("\033[1m"); }
-void bold_off() { printf("\033[0m"); }
 
 void print_usage()
 {
-    bold_on();
     printf("\nUSAGE\n");
-    bold_off();
     printf("\t--n : number of points\n");
     printf("\t--d : number of dimensions\n");
     printf("\t--k : number of neighbors\n");
@@ -28,9 +24,7 @@ void print_usage()
     printf("\t--sequential : sequential search\n");
     printf("\t--parallel : parallel search\n");
     printf("\t--all : all the three together search\n");
-    bold_on();
     printf("\nEXAMPLE\n");
-    bold_off();
     printf("\nTo search the 4 nearest neighbors of a query amongst 1000 points of dimension 5 sequentially, type the following command:\n");
     printf("\n\t./main --n=1000 --d=5 --k=4 --sequential\n\n");
 }
@@ -113,12 +107,13 @@ int main(int argc, char *argv[])
         }
     }
 
+    // if the right amount of args are not given
     if (long_index < 2)
     {
         print_usage();
         return EXIT_FAILURE;
     }
-
+    // if only sequential
     if (s == 1 && p == 0 && b == 0)
     {
         srand(42);
@@ -126,6 +121,7 @@ int main(int argc, char *argv[])
         run_sequential();
         free_knn();
     }
+    // if only parallel
     else if (s == 0 && p == 1 && b == 0)
     {
         srand(42);
@@ -133,6 +129,7 @@ int main(int argc, char *argv[])
         run_parallel();
         free_knn();
     }
+    // if only brute
     else if (s == 0 && p == 0 && b == 1)
     {
         srand(42);
@@ -140,6 +137,7 @@ int main(int argc, char *argv[])
         run_brute();
         free_knn();
     }
+    // everything
     else
     {
         srand(42);

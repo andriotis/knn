@@ -19,25 +19,32 @@ struct LinkedList *nearest;
 // CONSTRUCT VP-TREE AND SEARCH IN SEQUENCE
 void make(VPTree *node, int start, int end)
 {
+    // initialize the node
     node->idx = end;
     node->inner = node->outer = NULL;
     node->md = 0;
 
+    // base case
     if (start == end)
         return;
 
+    // calculate all the set's distances
     for (int i = start; i < end; i++)
         distances[i] = euclidean_dist(points[i], points[node->idx]);
 
+    // store median
     double md = get_median(start, end);
     node->md = md;
 
+    // make the right child
     node->outer = malloc(sizeof(VPTree));
     make(node->outer, (start + end) / 2, end - 1);
 
+    // additional check to reduce make calls
     if ((start + end) / 2 - 1 < start)
         return;
 
+    // make the left child
     node->inner = malloc(sizeof(VPTree));
     make(node->inner, start, (start + end) / 2 - 1);
 }
@@ -47,8 +54,10 @@ void search(VPTree *node, double *query)
     if (node == NULL)
         return;
 
+    // calculate the distance from the query of the current vp
     double x = euclidean_dist(query, points[node->idx]);
 
+    // add or remove the point according to priority
     if (x < tau)
     {
         push(&nearest, node->idx, x);
@@ -57,7 +66,7 @@ void search(VPTree *node, double *query)
         if (size(&nearest) == k)
             tau = peek(&nearest)->distance;
     }
-
+    // prioritize where to look
     if (x < node->md)
     {
         if (x - tau <= node->md)
@@ -74,6 +83,7 @@ void search(VPTree *node, double *query)
     }
 }
 
+// wrapper function for main
 void run_sequential()
 {
     VPTree *root = (VPTree *)malloc(sizeof(VPTree));

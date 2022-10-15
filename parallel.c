@@ -35,6 +35,7 @@ void make_vpt(VPTree *node, int start, int end)
 
   int available_threads = MAX_THREADS - active_threads;
 
+  // add thresholds in order to call the sequential code
   if (available_threads > 0 && (end - start + 1) / 2 > MIN_WORK_PER_THREAD)
   {
     update_active_threads(+available_threads);

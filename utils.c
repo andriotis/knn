@@ -16,6 +16,7 @@ extern double *distances;
 extern int MAX_THREADS, active_threads;
 extern pthread_mutex_t mutex;
 
+// Given 2 points, calculate their euclidean distance
 double euclidean_dist(double *a, double *b)
 {
   double dist = 0.0;
@@ -24,6 +25,7 @@ double euclidean_dist(double *a, double *b)
   return sqrt(dist);
 }
 
+// Using quickselect, find the median of the distances
 double get_median(int start, int end)
 {
   return (quickselect(start, end - 1, (end - start - 1) / 2 + 1) +
@@ -31,6 +33,7 @@ double get_median(int start, int end)
          2;
 }
 
+// an update for the active threads
 void update_active_threads(int amount)
 {
   pthread_mutex_lock(&mutex);
@@ -38,6 +41,7 @@ void update_active_threads(int amount)
   pthread_mutex_unlock(&mutex);
 }
 
+// the function of the threads responsible for the distances
 void *chunk_distances(void *args)
 {
   dist_arg *chunk = (dist_arg *)args;
@@ -45,6 +49,7 @@ void *chunk_distances(void *args)
     distances[i] = euclidean_dist(points[i], points[chunk->vp]);
 }
 
+// a wraper that gives each thread a chunk to work with
 void calculate_distances_parallel(int n, int t, int vp)
 {
   pthread_t threads[t];
@@ -61,12 +66,14 @@ void calculate_distances_parallel(int n, int t, int vp)
   }
 }
 
+// a basic calculation for distances
 void calculate_distances_sequential(int start, int end, int vp)
 {
   for (int i = start; i < end; i++)
     distances[i] = euclidean_dist(points[i], points[vp]);
 }
 
+// the calling function of a thread to make the inner child
 void *make_vpt_parallel(void *args)
 {
   TArgs *targs = (TArgs *)args;
